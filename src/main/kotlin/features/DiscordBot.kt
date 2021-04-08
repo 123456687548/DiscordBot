@@ -64,9 +64,10 @@ enum class DiscordBot {
             }
         }
         bot.on<ReadyEvent> {
-            initialized = true
             RiotApi.INSTANCE.initialize()
             TwitchApi.INSTANCE.initialize()
+            BBKApi.INSTANCE.initialize()
+            initialized = true
         }
 
         bot.on<VoiceStateUpdateEvent> {

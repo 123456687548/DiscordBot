@@ -19,4 +19,6 @@ class Settings {
     val league_tracker_server_id: Long = -1L
     val league_tracker_channel: Long = -1L
     val twitch_tracker_channel: Long = -1L
+    val bbk_tracker_server_id: Long = -1L
+    val bbk_tracker_channel: Long = -1L
 }
