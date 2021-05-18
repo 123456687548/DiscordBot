@@ -78,8 +78,7 @@ enum class BBKApi {
         val filteredWarnings = warning.filter { filterdWarning ->
             val dateString = filterdWarning.sent
             val date = LocalDateTime.parse(dateString, ISO_OFFSET_DATE_TIME)
-
-            currentTime.isBefore(date.minusMinutes(30L))
+            currentTime.minusMinutes(30L).isBefore(date)
         }.filter { filterdWarning ->
             val infos = filterdWarning.info.filter { info ->
                 val areas = info.area.filter { area ->
@@ -93,7 +92,14 @@ enum class BBKApi {
 
         filteredWarnings.forEach { filteredWarning ->
             filteredWarning.info.forEach {
-                val message = if (it.web.isNullOrBlank()) it.headline else String.format("%s\n%s", it.headline, it.web)
+                val headline = it.headline;
+                val description = it.description.replace("<br/>", "\n");
+                var message = "";
+                if (headline == "Bombenfund") {
+                    message = String.format("%s\n\n%s\n\n%s", headline, description, it.web);
+                } else {
+                    message = if (it.web.isNullOrBlank()) it.headline else String.format("%s\n%s", it.headline, it.web)
+                }
 
                 println(message)
                 sendDiscordMessage(message)
