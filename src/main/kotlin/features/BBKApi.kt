@@ -3,6 +3,7 @@ package features
 import com.google.gson.Gson
 import data.Settings
 import data.bbk.DangerWarning
+import data.bbk.DangerWarningItem
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.entity.channel.TextChannel
@@ -25,6 +26,8 @@ enum class BBKApi {
 
     private var initialized = false
     private lateinit var bot: Kord
+
+    private var knownWarnings = ArrayList<DangerWarningItem>()
 
     fun initialize() {
 
@@ -77,8 +80,8 @@ enum class BBKApi {
 
         val filteredWarnings = warning.filter { filterdWarning ->
             val dateString = filterdWarning.sent
-            val date = LocalDateTime.parse(dateString, ISO_OFFSET_DATE_TIME)
-            currentTime.minusMinutes(30L).isBefore(date)
+            val sendDate = LocalDateTime.parse(dateString, ISO_OFFSET_DATE_TIME)
+            currentTime.minusMinutes(30L).isBefore(sendDate)
         }.filter { filterdWarning ->
             val infos = filterdWarning.info.filter { info ->
                 val areas = info.area.filter { area ->
@@ -100,11 +103,23 @@ enum class BBKApi {
                 } else {
                     message = if (it.web.isNullOrBlank()) it.headline else String.format("%s\n%s", it.headline, it.web)
                 }
-
-                println(message)
-                sendDiscordMessage(message)
+                if (!knownWarnings.contains(filteredWarning)) {
+                    knownWarnings.add(filteredWarning)
+                    println(message)
+                    sendDiscordMessage(message)
+                }
             }
         }
+        cleanKnownWarnings()
+    }
+
+    private fun cleanKnownWarnings() {
+        val currentTime = LocalDateTime.now()
+        knownWarnings = knownWarnings.filter { warning ->
+            val dateString = warning.sent
+            val sendDate = LocalDateTime.parse(dateString, ISO_OFFSET_DATE_TIME)
+            currentTime.minusMinutes(60L).isBefore(sendDate)
+        } as ArrayList<DangerWarningItem>
     }
 
     private suspend fun sendDiscordMessage(message: String) {
