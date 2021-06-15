@@ -27,7 +27,7 @@ enum class RiotApi {
     private val GAME_RANKED_QUEUE_MESSAGE_TEMPLATE = "%s  %s  %s   %s%%  LP:  %d%s"
     private val GAME_RANKED_QUEUE_PROMO_MESSAGE_TEMPLATE = "   %s"
 
-    private val SCORE_TEMPLATE = "[ K / D / A | M ]"
+    private val SCORE_TEMPLATE = "[ K / D / A | M ( MPM )]"
 
     private val WON_EMOTE = ":white_check_mark:"
     private val LOSS_EMOTE = ":no_entry_sign:"
@@ -137,9 +137,15 @@ enum class RiotApi {
             val kills = "${stats!!.kills}"
             val deaths = "${stats.deaths}"
             val assists = "${stats.assists}"
-            val minions = "${stats.creepScore + stats.neutralMinionsKilled}"
+            val minions = stats.creepScore + stats.neutralMinionsKilled;
+            val minionsString = "${stats.creepScore + stats.neutralMinionsKilled}"
+            val minionsPerMinute = "${(minions / 60)}"
 
-            retVal.replace("K", kills).replace("D", deaths).replace("A", assists).replace("M", minions)
+            retVal.replace("K", kills)
+                .replace("D", deaths)
+                .replace("A", assists)
+                .replace("MPM", minionsPerMinute)
+                .replace("M", minionsString)
         }()
 
         val message = String.format(GAME_OVER_MESSAGE_TEMPLATE, (if (won!!) WON_EMOTE else LOSS_EMOTE), Time.getTime(), player.realName, (if (won) "GEWONNEN" else "VERLOREN"), score)
