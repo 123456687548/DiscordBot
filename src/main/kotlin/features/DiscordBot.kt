@@ -3,16 +3,13 @@ package features
 import command.CommandManager
 import data.SecretProvider
 import dev.kord.core.Kord
-import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.core.on
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import util.Time
 
@@ -127,14 +124,25 @@ enum class DiscordBot {
         return productId.substring(0, idEnd)
     }
 
+    private fun getVideoID(link: String): String {
+        val sdf = "/gp/video/detail/"
+        val idStart = link.indexOf(sdf) + sdf.length
+        val videoId = link.substring(idStart)
+        val idEnd = if (videoId.indexOf('/') == -1) videoId.indexOf('?') else videoId.indexOf('/')
+        return videoId.substring(0, idEnd)
+    }
+
     private fun getDomain(link: String): String {
         val domain = link.split('.')[2]
         return domain.substring(0, domain.indexOf('/'))
     }
 
     private fun shortenLink(link: String): String {
-        val productId = getProductID(link)
         val domain = getDomain(link)
-        return String.format("%s%s%s%s", "https://www.amazon.", domain, "/dp/", productId)
+        return if (link.contains("/gp/")) {
+            String.format("https://www.amazon.%s/gp/video/detail/%s", domain, getVideoID(link))
+        } else {
+            String.format("https://www.amazon.%s/dp/%s", domain, getProductID(link))
+        }
     }
 }
