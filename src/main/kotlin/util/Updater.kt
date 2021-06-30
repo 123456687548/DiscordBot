@@ -42,13 +42,13 @@ object Updater {
         }
     }
 
-    fun downloadNewRelease(): Boolean {
+    private fun downloadNewRelease(): Boolean {
         try {
-            BufferedInputStream(URL(updateFileURL).openStream()).use { `in` ->
+            BufferedInputStream(URL(updateFileURL).openStream()).use { inputStream ->
                 FileOutputStream(fileName).use { fileOutputStream ->
                     val dataBuffer = ByteArray(1024)
                     var bytesRead: Int
-                    while (`in`.read(dataBuffer, 0, 1024).also { bytesRead = it } != -1) {
+                    while (inputStream.read(dataBuffer, 0, 1024).also { bytesRead = it } != -1) {
                         fileOutputStream.write(dataBuffer, 0, bytesRead)
                     }
                 }
@@ -60,7 +60,7 @@ object Updater {
     }
 
 
-    fun isUpdateAvailable(): Boolean {
+    private fun isUpdateAvailable(): Boolean {
         try {
             val url = URL(LATEST_RELEASE_URL)
             val con = url.openConnection() as HttpURLConnection
