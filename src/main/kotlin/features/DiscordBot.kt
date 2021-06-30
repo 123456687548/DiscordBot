@@ -12,6 +12,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import util.Time
+import util.Updater
 
 @ExperimentalStdlibApi
 enum class DiscordBot {
@@ -65,6 +66,10 @@ enum class DiscordBot {
             TwitchApi.INSTANCE.initialize()
             BBKApi.INSTANCE.initialize()
             initialized = true
+
+            bot.editPresence {
+                playing(" on Version ${Updater.CURRENT_VERSION_STRING}")
+            }
         }
 
         bot.on<VoiceStateUpdateEvent> {
@@ -85,7 +90,6 @@ enum class DiscordBot {
                     message = createChannelJoinMessage(member.displayName, channel!!.name)
                 }
             } else {
-
                 if (new.channelId != null) {
                     if (old.channelId == null) {
                         message = createChannelJoinMessage(member.displayName, channel!!.name)

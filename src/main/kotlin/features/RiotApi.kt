@@ -62,15 +62,15 @@ enum class RiotApi {
     private fun start() {
         GlobalScope.launch {
             while (true) {
-                bot.editPresence {
-                    playing("Scanning")
-                }
+//                bot.editPresence {
+//                    playing("Scanning")
+//                }
                 summonerList.forEach { player ->
                     evalPlayerStatus(player)
                 }
-                bot.editPresence {
-                    playing("Waiting")
-                }
+//                bot.editPresence {
+//                    playing("Waiting")
+//                }
                 delay(60000L)
             }
         }.invokeOnCompletion {
