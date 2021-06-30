@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "me.tim"
-version = "1.0-SNAPSHOT"
+version = ""
 
 application {
     mainClass.set("Main")
