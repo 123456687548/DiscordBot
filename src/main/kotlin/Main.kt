@@ -1,10 +1,6 @@
 import features.DiscordBot
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import util.Updater.checkForUpdate
-import util.splitOutStream
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -15,8 +11,6 @@ import kotlin.concurrent.thread
 object Main {
     @JvmStatic
     fun main(args: Array<String>) {
-        splitOutStream()
-
         checkForUpdate()
 
         runBlocking {
