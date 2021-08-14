@@ -87,19 +87,19 @@ enum class DiscordBot {
 
             if (old == null) {
                 if (new.channelId != null) {
-                    message = createChannelJoinMessage(member.displayName, channel!!.name)
+                    message = createChannelJoinMessage(member.displayName, channel!!.asChannel().name)
                 }
             } else {
                 if (new.channelId != null) {
                     if (old.channelId == null) {
-                        message = createChannelJoinMessage(member.displayName, channel!!.name)
+                        message = createChannelJoinMessage(member.displayName, channel!!.asChannel().name)
                     } else if (old.channelId != new.channelId) {
-                        message = createChannelChangeMessage(member.displayName, this.old?.getChannelOrNull()!!.name, channel!!.name)
+                        message = createChannelChangeMessage(member.displayName, this.old?.getChannelOrNull()!!.asChannel().name, channel!!.asChannel().name)
                     }
                 }
 
                 if (old.channelId != null && new.channelId == null) {
-                    message = createChannelLeaveMessage(member.displayName, this.old?.getChannelOrNull()!!.name)
+                    message = createChannelLeaveMessage(member.displayName, this.old?.getChannelOrNull()!!.asChannel().name)
                 }
             }
             if (voiceLogChannel != null && voiceLogChannel is TextChannel && message != null) {

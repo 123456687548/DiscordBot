@@ -68,7 +68,7 @@ object Main {
                             }
                         }
 
-                        exec("/opt/DiscordBot/start")
+                        exec("~/start")
 
                         if (procId != null) {
                             exec("screen -XS $procId quit")

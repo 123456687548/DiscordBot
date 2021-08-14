@@ -99,9 +99,9 @@ enum class BBKApi {
                 val description = it.description.replace("<br/>", "\n");
                 var message = "";
                 if (headline == "Bombenfund") {
-                    message = String.format("%s\n\n%s\n\n%s", headline, description, it.web);
+                    message = String.format("%s\n\n%s\n\nhttps://%s", headline, description, it.web);
                 } else {
-                    message = if (it.web.isNullOrBlank()) it.headline else String.format("%s\n%s", it.headline, it.web)
+                    message = if (it.web.isNullOrBlank()) it.headline else String.format("%s\nhttps://%s", it.headline, it.web)
                 }
                 if (!knownWarnings.contains(filteredWarning)) {
                     knownWarnings.add(filteredWarning)

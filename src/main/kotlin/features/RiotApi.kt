@@ -139,7 +139,7 @@ enum class RiotApi {
             val assists = "${stats.assists}"
             val minions = stats.creepScore + stats.neutralMinionsKilled;
             val minionsString = "${stats.creepScore + stats.neutralMinionsKilled}"
-            val minionsPerMinute = "${(minions / 60)}"
+            val minionsPerMinute = "${(minions / match.duration.standardMinutes)}"
 
             retVal.replace("K", kills)
                 .replace("D", deaths)
