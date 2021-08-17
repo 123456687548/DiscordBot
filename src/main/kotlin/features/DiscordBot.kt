@@ -79,6 +79,8 @@ enum class DiscordBot {
             val member = this.state.getMember()
             val channel = this.state.getChannelOrNull()
 
+            if(member.isBot) return@on
+
             val voiceLogChannel = new.getGuild().channels.first {
                 (it is TextChannel && it.name == "voicelog")
             }.asChannelOrNull()
