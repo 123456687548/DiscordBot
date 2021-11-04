@@ -1,9 +1,5 @@
 package features
 
-import com.merakianalytics.orianna.Orianna
-import com.merakianalytics.orianna.types.common.Queue
-import com.merakianalytics.orianna.types.common.Region
-import com.merakianalytics.orianna.types.core.summoner.Summoner
 import data.LeaguePlayer
 import data.PlayerProvider
 import data.SecretProvider
@@ -15,8 +11,17 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import no.stelar7.api.r4j.basic.APICredentials
+import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard
+import no.stelar7.api.r4j.basic.constants.api.regions.RegionShard
+import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType
+import no.stelar7.api.r4j.impl.R4J
+import no.stelar7.api.r4j.pojo.lol.league.LeagueEntry
+import no.stelar7.api.r4j.pojo.lol.summoner.Summoner
 import util.Time
 import java.text.DecimalFormat
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 @ExperimentalStdlibApi
 enum class RiotApi {
@@ -39,18 +44,20 @@ enum class RiotApi {
 
     private val playerInfoMap: MutableMap<String, LeaguePlayer> = hashMapOf()
 
+    private lateinit var r4j: R4J
+
     fun initialize() {
         if (initialized) return
 
         this.bot = DiscordBot.INSTANCE.bot
 
         try {
-            Orianna.setRiotAPIKey(SecretProvider.INSTANCE.get("riot-api").secret)
-            Orianna.setDefaultLocale("en_US")
-            Orianna.setDefaultRegion(Region.EUROPE_WEST)
-
+            r4j = R4J(APICredentials(SecretProvider.INSTANCE.get("riot-api").secret))
+//            Orianna.setRiotAPIKey(SecretProvider.INSTANCE.get("riot-api").secret)
+//            Orianna.setDefaultLocale("en_US")
+//            Orianna.setDefaultRegion(Region.EUROPE_WEST)
             PlayerProvider.INSTANCE.players.forEach { (name, player) ->
-                summonerList.add(Orianna.summonerNamed(name).get())
+                summonerList.add(r4j.loLAPI.summonerAPI.getSummonerByName(LeagueShard.EUW1, name))
                 playerInfoMap[name] = player
             }
             start()
@@ -73,8 +80,10 @@ enum class RiotApi {
 //                }
                 delay(60000L)
             }
-        }.invokeOnCompletion {
+        }.invokeOnCompletion { throwable ->
             runBlocking {
+                throwable?.let { it1 -> DiscordBot.INSTANCE.sendErrorMessage(it1) }
+
                 bot.editPresence {
                     playing("ERROR RIOT")
                 }
@@ -86,60 +95,69 @@ enum class RiotApi {
     private suspend fun evalPlayerStatus(summoner: Summoner) {
         val player = playerInfoMap[summoner.name] ?: throw NoSuchElementException("${summoner.name} no in playerInfoMap")
         //game over
-        if (player.ingame && !summoner.isInGame) {
+        if (player.ingame && summoner.currentGame != null) {
             player.ingame = false
             evalGameOver(summoner)
             return
         }
         //game started
-        if (!player.ingame && summoner.isInGame) {
+        if (!player.ingame && summoner.currentGame != null) {
             player.ingame = true
-            player.lastMatchId = summoner.currentMatch.id
+            player.lastMatchId = "EUW1_${summoner.currentGame.gameId}"
             evalGameStart(summoner)
         }
     }
 
+    private fun getWinrateString(leagueEntry: LeagueEntry?): String {
+        if (leagueEntry == null) return ""
+
+        val winrate = leagueEntry.wins.toDouble() / (leagueEntry.wins + leagueEntry.losses).toDouble() * 100
+        val df = DecimalFormat("#.##")
+        return df.format(winrate)
+    }
+
     private suspend fun evalGameStart(summoner: Summoner) {
         val player = playerInfoMap[summoner.name] ?: throw NoSuchElementException("${summoner.name} no in playerInfoMap")
-        val match = summoner.currentMatch
-        val queue = match.queue
-        val champion = match.participants.filterNotNull().find { it.summoner.name == summoner.name }?.champion
-        val league = summoner.getLeaguePosition(if (queue == Queue.RANKED_SOLO || queue == Queue.RANKED_FLEX) queue else Queue.RANKED_SOLO)
+        val match = summoner.currentGame
+        val queue = match.gameQueueConfig
+        val champion = match.participants.filterNotNull().find { it.summonerName == summoner.name }?.championId
+        val league = summoner.leagueEntry.first { it.queueType == queue }
 
-        val winrate = {
-            val winrate = league.wins.toDouble() / (league.wins + league.losses).toDouble() * 100
-            val df = DecimalFormat("#.##")
-            df.format(winrate)
-        }()
 
-        val promo = league.promos
+        val winrate = getWinrateString(league)
 
-        val promoText = if (promo == null) "" else String.format(GAME_RANKED_QUEUE_PROMO_MESSAGE_TEMPLATE, promo.progess)
+        val promo = league.miniSeries
 
-        val rankedInfo = if (queue == Queue.RANKED_SOLO || queue == Queue.RANKED_FLEX)
-            String.format(GAME_RANKED_QUEUE_MESSAGE_TEMPLATE, (if (queue == Queue.RANKED_SOLO) "SoloQ" else "Flex"), league.tier, league.division, winrate, league.leaguePoints, promoText)
+        val promoText = if (league.isInPromos) "" else String.format(GAME_RANKED_QUEUE_PROMO_MESSAGE_TEMPLATE, promo.progress)
+
+        val rankedInfo = if (league != null && (queue == GameQueueType.RANKED_SOLO_5X5 || queue == GameQueueType.RANKED_FLEX_SR))
+            String.format(GAME_RANKED_QUEUE_MESSAGE_TEMPLATE, (if (queue == GameQueueType.RANKED_SOLO_5X5) "SoloQ" else "Flex"), league.tier, league.tierDivisionType.prettyName(), winrate, league.leaguePoints, promoText)
         else
             ""
-
-        val gameInfo = String.format(GAME_START_MESSAGE_TEMPLATE, Time.getTime(), player.realName, champion?.name, match.queue.name, rankedInfo)
+//todo get champ name
+        val gameInfo = String.format(GAME_START_MESSAGE_TEMPLATE, Time.getTime(), player.realName, champion, queue.name, rankedInfo)
         sendDiscordMessage(gameInfo)
     }
 
     private suspend fun evalGameOver(summoner: Summoner) {
         val player = playerInfoMap[summoner.name] ?: throw NoSuchElementException("${summoner.name} no in playerInfoMap")
-        val match = Orianna.matchWithId(player.lastMatchId).get()
-        val participant = match.participants.filterNotNull().find { it.summoner.name == summoner.name }.takeIf { it != null }
-        val won = participant?.team?.isWinner
-        val stats = participant?.stats
+
+        val match = r4j.loLAPI.matchAPI.getMatch(RegionShard.EUROPE, player.lastMatchId)
+        val participant = match.participants.filterNotNull().find { it.summonerName == summoner.name }.takeIf { it != null }
+        val won = participant?.didWin()
+        val stats = participant?.kills
 
         val score = {
             val retVal = SCORE_TEMPLATE
-            val kills = "${stats!!.kills}"
-            val deaths = "${stats.deaths}"
-            val assists = "${stats.assists}"
-            val minions = stats.creepScore + stats.neutralMinionsKilled;
-            val minionsString = "${stats.creepScore + stats.neutralMinionsKilled}"
-            val minionsPerMinute = "${(minions / match.duration.standardMinutes)}"
+            val kills = "${participant!!.kills}"
+            val deaths = "${participant.deaths}"
+            val assists = "${participant.assists}"
+            val minions = participant.totalMinionsKilled
+            val minionsString = "${minions}"
+            val startTime = match.gameStartAsDate
+            val endTime = match.gameEndAsDate
+            val gameTimeInMinutes = ChronoUnit.MINUTES.between(startTime, endTime)
+            val minionsPerMinute = "${(minions / gameTimeInMinutes)}"
 
             retVal.replace("K", kills)
                 .replace("D", deaths)

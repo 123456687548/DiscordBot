@@ -2,15 +2,24 @@ package features
 
 import command.CommandManager
 import data.SecretProvider
+import data.Settings
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
+import dev.kord.core.behavior.channel.createEmbed
+import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.entity.channel.MessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.core.on
+import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kord.rest.builder.message.create.embed
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import util.Time
 import util.Updater
 
@@ -79,7 +88,7 @@ enum class DiscordBot {
             val member = this.state.getMember()
             val channel = this.state.getChannelOrNull()
 
-            if(member.isBot) return@on
+            if (member.isBot) return@on
 
             val voiceLogChannel = new.getGuild().channels.first {
                 (it is TextChannel && it.name == "voicelog")
@@ -149,6 +158,31 @@ enum class DiscordBot {
             String.format("https://www.amazon.%s/gp/video/detail/%s", domain, getVideoID(link))
         } else {
             String.format("https://www.amazon.%s/dp/%s", domain, getProductID(link))
+        }
+    }
+
+    suspend fun sendErrorMessage(throwable: Throwable){
+        val channel = bot.getChannel(Snowflake(Settings.instance.admin_channel_id))
+
+        if (channel !is TextChannel) return
+
+        channel.createMessage {
+            embed {
+                title = "DiscordBot Error"
+
+                if (throwable.message != null) {
+                    field {
+                        name = "Message"
+                        value = throwable.message!!
+                    }
+                }
+                if (throwable.stackTraceToString().isNotBlank()) {
+                    field {
+                        name = "Stacktrace"
+                        value = throwable.stackTraceToString().take(EmbedBuilder.Field.Limits.value - 1)
+                    }
+                }
+            }
         }
     }
 }

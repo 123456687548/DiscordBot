@@ -16,6 +16,7 @@ class Settings {
     }
 
     val owner: Long = -1
+    val admin_channel_id : Long = -1L
     val league_tracker_server_id: Long = -1L
     val league_tracker_channel: Long = -1L
     val twitch_tracker_channel: Long = -1L

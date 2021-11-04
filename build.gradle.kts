@@ -14,13 +14,15 @@ application {
 
 repositories {
     mavenCentral()
+    mavenLocal()
     jcenter()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://dl.bintray.com/kotlin/kotlin-eap")
+    maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation("com.merakianalytics.orianna:orianna:4.0.0-rc7")
+    implementation("com.github.stelar7:R4J:2.0.7")
     implementation("dev.kord:kord-core:0.8.0-M4")
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("com.github.twitch4j:twitch4j:1.1.2")

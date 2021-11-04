@@ -47,8 +47,10 @@ enum class BBKApi {
 
                 delay(600000L)
             }
-        }.invokeOnCompletion {
+        }.invokeOnCompletion { throwable ->
             runBlocking {
+                throwable?.let { it1 -> DiscordBot.INSTANCE.sendErrorMessage(it1) }
+
                 bot.editPresence {
                     playing("ERROR BBK")
                 }

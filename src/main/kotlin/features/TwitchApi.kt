@@ -3,21 +3,16 @@ package features
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential
 import com.github.twitch4j.TwitchClient
 import com.github.twitch4j.TwitchClientBuilder
-import com.merakianalytics.orianna.Orianna
-import com.merakianalytics.orianna.types.common.Region
-import data.PlayerProvider
 import data.SecretProvider
 import data.Settings
 import data.TwitchUserProvider
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
-import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.TextChannel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.concurrent.thread
 
 @ExperimentalStdlibApi
 enum class TwitchApi {
@@ -62,8 +57,10 @@ enum class TwitchApi {
                 }
                 delay(60000L)
             }
-        }.invokeOnCompletion {
+        }.invokeOnCompletion { throwable ->
             runBlocking {
+                throwable?.let { it1 -> DiscordBot.INSTANCE.sendErrorMessage(it1) }
+
                 bot.editPresence {
                     playing("ERROR TWITCH")
                 }

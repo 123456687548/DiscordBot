@@ -25,4 +25,4 @@ enum class PlayerProvider {
     fun get(name: String) = players[name] ?: throw NoSuchElementException("\"$name\" is not specified in user.json")
 }
 
-data class LeaguePlayer(val summonerName: String, val realName: String, var ingame: Boolean = false, var lastMatchId: Long = -1L)
+data class LeaguePlayer(val summonerName: String, val realName: String, var ingame: Boolean = false, var lastMatchId: String = "")
