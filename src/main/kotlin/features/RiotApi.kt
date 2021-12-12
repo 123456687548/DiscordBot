@@ -20,7 +20,6 @@ import no.stelar7.api.r4j.pojo.lol.league.LeagueEntry
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner
 import util.Time
 import java.text.DecimalFormat
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 @ExperimentalStdlibApi
@@ -97,7 +96,7 @@ enum class RiotApi {
         //game over
         if (player.ingame && summoner.currentGame != null) {
             player.ingame = false
-            evalGameOver(summoner)
+             evalGameOver(summoner)
             return
         }
         //game started
@@ -121,17 +120,18 @@ enum class RiotApi {
         val match = summoner.currentGame
         val queue = match.gameQueueConfig
         val champion = match.participants.filterNotNull().find { it.summonerName == summoner.name }?.championId
-        val league = summoner.leagueEntry.first { it.queueType == queue }
-
-
-        val winrate = getWinrateString(league)
-
-        val promo = league.miniSeries
-
-        val promoText = if (league.isInPromos) "" else String.format(GAME_RANKED_QUEUE_PROMO_MESSAGE_TEMPLATE, promo.progress)
+        val league = summoner.leagueEntry.firstOrNull { it.queueType == queue }
 
         val rankedInfo = if (league != null && (queue == GameQueueType.RANKED_SOLO_5X5 || queue == GameQueueType.RANKED_FLEX_SR))
-            String.format(GAME_RANKED_QUEUE_MESSAGE_TEMPLATE, (if (queue == GameQueueType.RANKED_SOLO_5X5) "SoloQ" else "Flex"), league.tier, league.tierDivisionType.prettyName(), winrate, league.leaguePoints, promoText)
+            String.format(
+                GAME_RANKED_QUEUE_MESSAGE_TEMPLATE,
+                (if (queue == GameQueueType.RANKED_SOLO_5X5) "SoloQ" else "Flex"),
+                league.tier,
+                league.tierDivisionType.prettyName(),
+                getWinrateString(league),
+                league.leaguePoints,
+                if (league.isInPromos) "" else String.format(GAME_RANKED_QUEUE_PROMO_MESSAGE_TEMPLATE, league.miniSeries)
+            )
         else
             ""
 //todo get champ name
@@ -145,14 +145,13 @@ enum class RiotApi {
         val match = r4j.loLAPI.matchAPI.getMatch(RegionShard.EUROPE, player.lastMatchId)
         val participant = match.participants.filterNotNull().find { it.summonerName == summoner.name }.takeIf { it != null }
         val won = participant?.didWin()
-        val stats = participant?.kills
 
         val score = {
             val retVal = SCORE_TEMPLATE
             val kills = "${participant!!.kills}"
             val deaths = "${participant.deaths}"
             val assists = "${participant.assists}"
-            val minions = participant.totalMinionsKilled
+            val minions = participant.neutralMinionsKilled + participant.totalMinionsKilled
             val minionsString = "${minions}"
             val startTime = match.gameStartAsDate
             val endTime = match.gameEndAsDate
