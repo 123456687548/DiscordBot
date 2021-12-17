@@ -16,6 +16,8 @@ object DisableCmd : Command("disable", Permission.ADMIN) {
     override suspend fun exec(event: MessageCreateEvent, args: List<String>) {
         val message = event.message
 
+        message.delete()
+
         if (args.isEmpty()) {
             printHelp(message)
             return
@@ -34,7 +36,6 @@ object DisableCmd : Command("disable", Permission.ADMIN) {
         val response = message.channel.createMessage("Disabled ${args[0]} API")
 
         delay(5000)
-        message.delete()
         response.delete()
     }
 

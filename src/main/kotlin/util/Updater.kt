@@ -8,7 +8,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object Updater {
-    const val CURRENT_VERSION_STRING = "1.5"
+    const val CURRENT_VERSION_STRING = "1.6"
     private val CURRENT_VERSION = Version.getVersionFromString(CURRENT_VERSION_STRING)
     private const val LATEST_RELEASE_URL = "https://api.github.com/repos/123456687548/DiscordBot/releases/latest"
 

@@ -15,6 +15,8 @@ object RunningCmd : Command("running", Permission.ADMIN) {
     override suspend fun exec(event: MessageCreateEvent, args: List<String>) {
         val message = event.message
 
+        message.delete()
+
         val msg = String.format(
             "Running APIs:\n%s        %s\n%s   %s\n%s        %s",
             RiotApi.INSTANCE.apiName,
