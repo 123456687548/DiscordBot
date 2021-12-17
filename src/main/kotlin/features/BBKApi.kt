@@ -18,9 +18,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
 import kotlin.NoSuchElementException
 
-@ExperimentalStdlibApi
+@OptIn(ExperimentalStdlibApi::class)
 enum class BBKApi {
-    INSTANCE;
+    INSTANCE();
+
+    val apiName = "bbk"
+    private var enabled = true
 
     private val url = URL("https://warnung.bund.de/bbk.mowas/gefahrendurchsagen.json")
 
@@ -28,6 +31,9 @@ enum class BBKApi {
     private lateinit var bot: Kord
 
     private var knownWarnings = ArrayList<DangerWarningItem>()
+
+    private var errorCounter = 0
+    private var lastError: Long = 0
 
     fun initialize() {
 
@@ -39,8 +45,10 @@ enum class BBKApi {
     }
 
     private fun start() {
+        if (!enabled) return
+
         GlobalScope.launch {
-            while (true) {
+            while (enabled) {
                 val dangerWarnings = sendRequest()
 
                 evaluateWarnings(dangerWarnings)
@@ -49,10 +57,8 @@ enum class BBKApi {
             }
         }.invokeOnCompletion { throwable ->
             runBlocking {
-                throwable?.let { it1 -> DiscordBot.INSTANCE.sendErrorMessage(it1) }
-
-                bot.editPresence {
-                    playing("ERROR BBK")
+                throwable?.let { error ->
+                    handleError(error)
                 }
             }
             start()
@@ -132,5 +138,43 @@ enum class BBKApi {
 
         if (channel !is TextChannel) return
         channel.createMessage(message)
+    }
+
+    fun enable() {
+        if (enabled) return
+        enabled = true
+
+        start()
+    }
+
+    fun disable() {
+        if (!enabled) return
+        enabled = false
+    }
+
+    fun isEnabled() = enabled
+
+    private suspend fun handleError(error: Throwable) {
+        DiscordBot.INSTANCE.sendErrorMessage(error)
+        bot.editPresence {
+            playing("ERROR BBK")
+        }
+
+        val nowTime = System.currentTimeMillis()
+        val errorTimeDiff = nowTime - lastError
+        if (errorTimeDiff < 60000) {
+            errorCounter++
+        }
+
+        if (errorTimeDiff > 600000) {
+            errorCounter = 0
+        }
+
+        if (errorCounter >= 5) {
+            disable()
+            DiscordBot.INSTANCE.sendAdminChannelMessage("Auto disabled $apiName")
+        }
+
+        lastError = nowTime
     }
 }

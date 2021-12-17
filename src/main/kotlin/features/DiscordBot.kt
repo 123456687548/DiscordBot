@@ -161,7 +161,15 @@ enum class DiscordBot {
         }
     }
 
-    suspend fun sendErrorMessage(throwable: Throwable){
+    suspend fun sendAdminChannelMessage(message: String) {
+        val channel = bot.getChannel(Snowflake(Settings.instance.admin_channel_id))
+
+        if (channel !is TextChannel) return
+
+        channel.createMessage(message)
+    }
+
+    suspend fun sendErrorMessage(throwable: Throwable) {
         val channel = bot.getChannel(Snowflake(Settings.instance.admin_channel_id))
 
         if (channel !is TextChannel) return

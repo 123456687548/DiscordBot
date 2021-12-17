@@ -26,6 +26,9 @@ import java.time.temporal.ChronoUnit
 enum class RiotApi {
     INSTANCE;
 
+    val apiName = "riot"
+    private var enabled = true
+
     private val GAME_OVER_MESSAGE_TEMPLATE = "%s%s  %s hat %s\nScore: %s"
     private val GAME_START_MESSAGE_TEMPLATE = ":video_game:%s  %s is ingame!\nPlaying %s in %s\n%s"
     private val GAME_RANKED_QUEUE_MESSAGE_TEMPLATE = "%s  %s  %s   %s%%  LP:  %d%s"
@@ -45,6 +48,9 @@ enum class RiotApi {
 
     private lateinit var r4j: R4J
 
+    private var errorCounter = 0
+    private var lastError: Long = 0
+
     fun initialize() {
         if (initialized) return
 
@@ -52,9 +58,6 @@ enum class RiotApi {
 
         try {
             r4j = R4J(APICredentials(SecretProvider.INSTANCE.get("riot-api").secret))
-//            Orianna.setRiotAPIKey(SecretProvider.INSTANCE.get("riot-api").secret)
-//            Orianna.setDefaultLocale("en_US")
-//            Orianna.setDefaultRegion(Region.EUROPE_WEST)
             PlayerProvider.INSTANCE.players.forEach { (name, player) ->
                 summonerList.add(r4j.loLAPI.summonerAPI.getSummonerByName(LeagueShard.EUW1, name))
                 playerInfoMap[name] = player
@@ -66,8 +69,10 @@ enum class RiotApi {
     }
 
     private fun start() {
+        if (!enabled) return
+
         GlobalScope.launch {
-            while (true) {
+            while (enabled) {
 //                bot.editPresence {
 //                    playing("Scanning")
 //                }
@@ -81,10 +86,8 @@ enum class RiotApi {
             }
         }.invokeOnCompletion { throwable ->
             runBlocking {
-                throwable?.let { it1 -> DiscordBot.INSTANCE.sendErrorMessage(it1) }
-
-                bot.editPresence {
-                    playing("ERROR RIOT")
+                throwable?.let { error ->
+                    handleError(error)
                 }
             }
             start()
@@ -96,7 +99,7 @@ enum class RiotApi {
         //game over
         if (player.ingame && summoner.currentGame != null) {
             player.ingame = false
-             evalGameOver(summoner)
+            evalGameOver(summoner)
             return
         }
         //game started
@@ -177,5 +180,43 @@ enum class RiotApi {
 
         if (channel !is TextChannel) return
         channel.createMessage(message)
+    }
+
+    fun enable() {
+        if (enabled) return
+        enabled = true
+
+        start()
+    }
+
+    fun disable() {
+        if (!enabled) return
+        enabled = false
+    }
+
+    fun isEnabled() = enabled
+
+    private suspend fun handleError(error: Throwable) {
+        DiscordBot.INSTANCE.sendErrorMessage(error)
+        bot.editPresence {
+            playing("ERROR RIOT")
+        }
+
+        val nowTime = System.currentTimeMillis()
+        val errorTimeDiff = nowTime - lastError
+        if (errorTimeDiff < 60000) {
+            errorCounter++
+        }
+
+        if (errorTimeDiff > 600000) {
+            errorCounter = 0
+        }
+
+        if (errorCounter >= 5) {
+            disable()
+            DiscordBot.INSTANCE.sendAdminChannelMessage("Auto disabled $apiName")
+        }
+
+        lastError = nowTime
     }
 }

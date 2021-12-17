@@ -24,4 +24,4 @@ suspend fun Member.getPermissionLevel(): Permission {
     return Permission.NORMAL
 }
 
-fun Member.isBotOwner() = id.value == Settings.instance.owner
+fun Member.isBotOwner() = id.value.toLong() == Settings.instance.owner

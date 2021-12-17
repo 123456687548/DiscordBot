@@ -1,9 +1,6 @@
 package command
 
-import commands.ClearCmd
-import commands.PingCmd
-import commands.RestartCmd
-import commands.StopCmd
+import commands.*
 import dev.kord.common.Color
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.entity.channel.TextChannel
@@ -20,7 +17,10 @@ class CommandManager {
         PingCmd.getPair(),
         ClearCmd.getPair(),
         RestartCmd.getPair(),
-        StopCmd.getPair()
+        StopCmd.getPair(),
+        EnableCmd.getPair(),
+        DisableCmd.getPair(),
+        RunningCmd.getPair()
     )
 
     suspend fun handleCommand(event: MessageCreateEvent) {
