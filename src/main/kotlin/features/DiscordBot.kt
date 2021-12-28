@@ -72,7 +72,7 @@ enum class DiscordBot {
         }
         bot.on<ReadyEvent> {
             RiotApi.INSTANCE.initialize()
-//            TwitchApi.INSTANCE.initialize()
+            TwitchApi.INSTANCE.initialize()
             BBKApi.INSTANCE.initialize()
             initialized = true
 

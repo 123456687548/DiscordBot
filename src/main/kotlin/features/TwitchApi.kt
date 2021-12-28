@@ -19,7 +19,7 @@ enum class TwitchApi {
     INSTANCE;
 
     val apiName = "twitch"
-    private var enabled = false
+    private var enabled = true
 
     private lateinit var bot: Kord
     private lateinit var client: TwitchClient
@@ -107,7 +107,7 @@ enum class TwitchApi {
 
         val nowTime = System.currentTimeMillis()
         val errorTimeDiff = nowTime - lastError
-        if (errorTimeDiff < 60000) {
+        if (errorTimeDiff < 60000 * 2) {
             errorCounter++
         }
 
@@ -117,7 +117,7 @@ enum class TwitchApi {
 
         if (errorCounter >= 5) {
             disable()
-            DiscordBot.INSTANCE.sendAdminChannelMessage("Auto disabled $apiName")
+            DiscordBot.INSTANCE.sendAdminChannelMessage("Auto disabled $apiName API")
         }
 
         lastError = nowTime
