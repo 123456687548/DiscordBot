@@ -28,6 +28,7 @@ hs_err_pid*
 /META-INF
 /.idea
 /out
+/target
 /build
 /.gradle
 /gradle
