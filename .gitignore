@@ -34,6 +34,7 @@ hs_err_pid*
 gradlew
 gradlew.bat
 secrets.json
+src/main/resources/secrets.properties
 settings.json
 streams.json
 user.json
