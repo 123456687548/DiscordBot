@@ -4,8 +4,8 @@ import eu.time.discordbot.discord.features.AmazonFeature;
 import eu.time.discordbot.discord.features.AntiTikTok;
 import eu.time.discordbot.discord.listeners.DiscordListener;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class ChatListener extends DiscordListener {
@@ -17,7 +17,7 @@ public class ChatListener extends DiscordListener {
     }
 
     @Override
-    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         executeFeatures(event);
     }
 }

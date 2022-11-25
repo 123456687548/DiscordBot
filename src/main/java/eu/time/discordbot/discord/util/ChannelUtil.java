@@ -1,7 +1,8 @@
 package eu.time.discordbot.discord.util;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 import java.util.List;
 import java.util.function.Consumer;

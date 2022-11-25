@@ -3,12 +3,13 @@ package eu.time.discordbot.discord.listeners.voice;
 import eu.time.discordbot.discord.listeners.DiscordListener;
 import eu.time.discordbot.discord.util.ChannelUtil;
 import eu.time.discordbot.util.TimeUtil;
-import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.guild.voice.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 public class VoiceListener extends DiscordListener {
@@ -23,7 +24,20 @@ public class VoiceListener extends DiscordListener {
     private static final String ADMIN_CHANNEL_NAME = "Admin Raum";
 
     @Override
-    public void onGuildVoiceJoin(@Nonnull GuildVoiceJoinEvent event) {
+    public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
+        AudioChannelUnion channelJoined = event.getChannelJoined();
+        AudioChannelUnion channelLeft = event.getChannelLeft();
+
+        if(channelLeft != null && channelJoined != null){
+            onGuildVoiceMove(event);
+            return;
+        }
+
+        if(channelLeft != null) onGuildVoiceLeave(event);
+        if(channelJoined != null) onGuildVoiceJoin(event);
+    }
+
+    private void onGuildVoiceJoin(@NotNull GuildVoiceUpdateEvent event) {
         AudioChannel channelJoined = event.getChannelJoined();
         String username = event.getMember().getEffectiveName();
 
@@ -32,8 +46,7 @@ public class VoiceListener extends DiscordListener {
         sendJoinMessage(event.getGuild(), channelJoined, username);
     }
 
-    @Override
-    public void onGuildVoiceLeave(@Nonnull GuildVoiceLeaveEvent event) {
+    private void onGuildVoiceLeave(@NotNull GuildVoiceUpdateEvent event) {
         AudioChannel channelLeft = event.getChannelLeft();
         String username = event.getMember().getEffectiveName();
         if (isAdminChannel(channelLeft)) return;
@@ -41,8 +54,7 @@ public class VoiceListener extends DiscordListener {
         sendLeaveMessage(event.getGuild(), channelLeft, username);
     }
 
-    @Override
-    public void onGuildVoiceMove(@Nonnull GuildVoiceMoveEvent event) {
+    private void onGuildVoiceMove(@NotNull GuildVoiceUpdateEvent event) {
         AudioChannel channelLeft = event.getChannelLeft();
         AudioChannel channelJoined = event.getChannelJoined();
         Guild guild = event.getGuild();

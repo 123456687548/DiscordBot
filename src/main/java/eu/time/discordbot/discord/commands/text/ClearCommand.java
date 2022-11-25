@@ -2,6 +2,7 @@ package eu.time.discordbot.discord.commands.text;
 
 import eu.time.discordbot.discord.command.Permission;
 import eu.time.discordbot.discord.command.TextCommand;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -21,12 +22,18 @@ public class ClearCommand extends TextCommand {
 
         try {
             int amountToDelete = Integer.parseInt(args.get(0));
-            messageHandler.deleteMessage(event);
 
-            MessageChannelUnion channel = event.getChannel();
+            TextChannel channel = event.getChannel().asTextChannel();
 
-            channel.getHistoryAfter(event.getMessageId(), amountToDelete).queue(result -> {
+//            channel.history
+//
+//            channel.getHistoryAfter(event.getMessage(), amountToDelete).queue(result -> {
+//                result
+//            }, Throwable::printStackTrace);
+
+            channel.getHistoryBefore(event.getMessageId(), amountToDelete).queue(result -> {
                 messageHandler.deleteMessages(channel, result.getRetrievedHistory());
+                messageHandler.deleteMessage(event);
             });
         } catch (NumberFormatException numberFormatException) {
             messageHandler.sendMessage(event, "Argument is not a number!");

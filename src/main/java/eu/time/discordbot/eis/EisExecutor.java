@@ -4,10 +4,9 @@ import data.Product;
 import eis.EisQuery;
 import eu.time.discordbot.discord.DiscordBot;
 import eu.time.discordbot.discord.util.ChannelUtil;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class EisExecutor {
     private final DiscordBot discordBot;
 
-    private final EisQuery eisQuery = new EisQuery();
+    private final EisQuery eisQuery = EisHandler.EIS;
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     volatile boolean isStopIssued;
 
@@ -31,16 +30,14 @@ public class EisExecutor {
 
     public void startExecutionAt(int targetHour, int targetMin, int targetSec) {
         Runnable taskWrapper = () -> {
-            List<Product> products = eisQuery.getFreeProducts();
+            List<MessageEmbed> freeDiscordEmbeds = EisHandler.createFreeDiscordEmbeds();
 
             List<Guild> guilds = discordBot.getJda().getGuilds();
 
             for (Guild guild : guilds) {
                 List<TextChannel> channels = ChannelUtil.getChannels(guild, "admin-chat");
                 for (TextChannel channel : channels) {
-                    for (Product product : products) {
-                        channel.sendMessage("----------------------\n" + product.toString()).queue();
-                    }
+                    channel.sendMessageEmbeds(freeDiscordEmbeds).queue();
                 }
             }
 

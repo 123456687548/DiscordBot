@@ -2,7 +2,7 @@ package eu.time.discordbot.discord.util;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class MessageHandler {
         deleteMessage(event.getMessage());
     }
 
-    public void deleteMessages(MessageChannel channel, List<Message> messages) {
+    public void deleteMessages(TextChannel channel, List<Message> messages) {
         channel.purgeMessages(messages);
     }
 
@@ -29,10 +29,11 @@ public class MessageHandler {
     }
 
     public void sendMessage(MessageReceivedEvent event, CharSequence msg) {
-        sendMessage(event.getChannel(), msg);
+        sendMessage(event.getChannel().asTextChannel(), msg);
     }
 
-    public void sendMessage(MessageChannel channel, CharSequence msg) {
+    public void sendMessage(TextChannel channel, CharSequence msg) {
+        if(channel == null) return;
         channel.sendMessage(msg).queue();
     }
 

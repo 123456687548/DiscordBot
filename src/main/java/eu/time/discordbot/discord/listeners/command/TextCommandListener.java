@@ -6,7 +6,6 @@ import eu.time.discordbot.discord.commands.text.PingCommand;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,7 @@ public class TextCommandListener extends CommandListener<MessageReceivedEvent> {
     }
 
     @Override
-    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         String msg = event.getMessage().getContentStripped().trim().toLowerCase();
         if(!msg.startsWith(PREFIX)) return;
 

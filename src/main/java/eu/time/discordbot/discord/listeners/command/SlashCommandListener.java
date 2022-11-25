@@ -1,6 +1,7 @@
 package eu.time.discordbot.discord.listeners.command;
 
 import eu.time.discordbot.discord.command.Command;
+import eu.time.discordbot.discord.commands.slash.EisCommand;
 import eu.time.discordbot.discord.commands.slash.PingCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -11,7 +12,8 @@ import java.util.Map;
 public class SlashCommandListener extends CommandListener<SlashCommandInteractionEvent> {
     public SlashCommandListener() {
         super(Map.ofEntries(
-                new PingCommand().getAsPair()
+                new PingCommand().getAsPair(),
+                new EisCommand().getAsPair()
         ));
     }
 
@@ -28,6 +30,6 @@ public class SlashCommandListener extends CommandListener<SlashCommandInteractio
 
     @Override
     protected List<String> getParameters(SlashCommandInteractionEvent event) {
-        return Arrays.stream(event.getCommandPath().split("/")).skip(1).toList();
+        return null;
     }
 }

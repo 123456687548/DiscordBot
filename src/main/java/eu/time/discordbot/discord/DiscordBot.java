@@ -45,13 +45,13 @@ public enum DiscordBot {
                     .build();
 
             Collection<Command<SlashCommandInteractionEvent>> slashCommands = slashCommandListener.getCommands();
-            slashCommands.forEach(slashCommand -> jda.upsertCommand(slashCommand.getName(), slashCommand.getDescription()).queue());
+            slashCommands.forEach(slashCommand -> jda.upsertCommand(slashCommand.getName(), slashCommand.getDescription()).addOptions(slashCommand.getOptions()).queue());
             jda.awaitReady();
 
             launchEisQuery();
 
             MessageHandler.create(jda);
-        } catch (LoginException | InterruptedException | IOException e) {
+        } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
     }
