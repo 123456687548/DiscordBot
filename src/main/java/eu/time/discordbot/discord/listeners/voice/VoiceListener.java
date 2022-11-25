@@ -19,7 +19,8 @@ public class VoiceListener extends DiscordListener {
     private final String VOICE_CHANNEL_JOIN_LEAVE_TEMPLATE = "%s  %s**%s** %s voice channel `%s`";
     private final String VOICE_CHANNEL_CHANGE_TEMPLATE = "%s  %s**%s** went from `%s` to `%s`";
 
-    private final String VOICE_LOG_CHANNEL_NAME = "voicelog";
+    private static final String VOICE_LOG_CHANNEL_NAME = "voicelog";
+    private static final String ADMIN_CHANNEL_NAME = "Admin Raum";
 
     @Override
     public void onGuildVoiceJoin(@Nonnull GuildVoiceJoinEvent event) {
@@ -79,7 +80,7 @@ public class VoiceListener extends DiscordListener {
     }
 
     private boolean isAdminChannel(AudioChannel channel) {
-        return channel.getName().compareToIgnoreCase("Admin Raum") == 0;
+        return channel.getName().compareToIgnoreCase(ADMIN_CHANNEL_NAME) == 0;
     }
 
     private void getOrCreateVoiceLogChannel(Guild guild, Consumer<TextChannel> response) {
