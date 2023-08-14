@@ -48,7 +48,7 @@ public enum DiscordBot {
             slashCommands.forEach(slashCommand -> jda.upsertCommand(slashCommand.getName(), slashCommand.getDescription()).addOptions(slashCommand.getOptions()).queue());
             jda.awaitReady();
 
-            launchEisQuery();
+//            launchEisQuery();
 
             MessageHandler.create(jda);
         } catch (InterruptedException | IOException e) {
