@@ -9,7 +9,10 @@ public class SpotifyFilterFeature extends AbstractFeature<MessageReceivedEvent> 
     public void execute(MessageReceivedEvent event) {
         String contentRaw = event.getMessage().getContentRaw();
 
-        if (URLChecker.isURL(contentRaw) && contentRaw.contains("spotify")) {
+        if (URLChecker.isURL(contentRaw) && 
+            contentRaw.contains("spotify") && 
+            contentRaw.contains("/track/")
+        ) {
             messageHandler.sendMessage(event, String.format("From: %s\n%s", event.getAuthor().getAsMention(), removeShit(contentRaw)));
 
             messageHandler.deleteMessage(event);
