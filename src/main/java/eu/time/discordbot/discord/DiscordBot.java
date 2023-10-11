@@ -16,13 +16,17 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import javax.security.auth.login.LoginException;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum DiscordBot {
     INSTANCE;
+    public static final Logger LOG = LoggerFactory.getLogger(DiscordBot.class);
 
     private boolean initalized = false;
     private JDA jda;
@@ -35,20 +39,20 @@ public enum DiscordBot {
             SlashCommandListener slashCommandListener = new SlashCommandListener();
 
             jda = JDABuilder.createDefault(PropertiesUtil.getProperty("discord-api"))
-                    .addEventListeners(new TextCommandListener())
-                    .addEventListeners(slashCommandListener)
-                    .addEventListeners(new VoiceListener())
-                    .addEventListeners(new UserListener())
-                    .addEventListeners(new ChatListener())
-                    .setEnabledIntents(EnumSet.allOf(GatewayIntent.class))
-                    .setActivity(Activity.playing("V. 1.0"))
-                    .build();
+                .addEventListeners(new TextCommandListener())
+                .addEventListeners(slashCommandListener)
+                .addEventListeners(new VoiceListener())
+                .addEventListeners(new UserListener())
+                .addEventListeners(new ChatListener())
+                .setEnabledIntents(EnumSet.allOf(GatewayIntent.class))
+                .setActivity(Activity.playing("V. 1.0"))
+                .build();
 
             Collection<Command<SlashCommandInteractionEvent>> slashCommands = slashCommandListener.getCommands();
             slashCommands.forEach(slashCommand -> jda.upsertCommand(slashCommand.getName(), slashCommand.getDescription()).addOptions(slashCommand.getOptions()).queue());
             jda.awaitReady();
 
-//            launchEisQuery();
+            //            launchEisQuery();
 
             MessageHandler.create(jda);
         } catch (InterruptedException | IOException e) {
