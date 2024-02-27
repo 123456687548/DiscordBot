@@ -1,5 +1,6 @@
 package eu.time.discordbot.discord;
 
+import eu.time.discordbot.crypto.CryptoExecutor;
 import eu.time.discordbot.discord.command.Command;
 import eu.time.discordbot.discord.listeners.message.ChatListener;
 import eu.time.discordbot.discord.listeners.user.UserListener;
@@ -39,25 +40,31 @@ public enum DiscordBot {
             SlashCommandListener slashCommandListener = new SlashCommandListener();
 
             jda = JDABuilder.createDefault(PropertiesUtil.getProperty("discord-api"))
-                .addEventListeners(new TextCommandListener())
-                .addEventListeners(slashCommandListener)
-                .addEventListeners(new VoiceListener())
-                .addEventListeners(new UserListener())
-                .addEventListeners(new ChatListener())
-                .setEnabledIntents(EnumSet.allOf(GatewayIntent.class))
-                .setActivity(Activity.playing("V. 1.0"))
-                .build();
+                    .addEventListeners(new TextCommandListener())
+                    .addEventListeners(slashCommandListener)
+                    .addEventListeners(new VoiceListener())
+                    .addEventListeners(new UserListener())
+                    .addEventListeners(new ChatListener())
+                    .setEnabledIntents(EnumSet.allOf(GatewayIntent.class))
+                    .setActivity(Activity.playing("V. 1.1"))
+                    .build();
 
             Collection<Command<SlashCommandInteractionEvent>> slashCommands = slashCommandListener.getCommands();
             slashCommands.forEach(slashCommand -> jda.upsertCommand(slashCommand.getName(), slashCommand.getDescription()).addOptions(slashCommand.getOptions()).queue());
             jda.awaitReady();
 
+            launchCryptoQuery();
             //            launchEisQuery();
 
             MessageHandler.create(jda);
-        } catch (InterruptedException | IOException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+     private void launchCryptoQuery() {
+        CryptoExecutor cryptoExecutor = new CryptoExecutor(this);
+        cryptoExecutor.startExecutionAt(23, 59, 59);
     }
 
     private void launchEisQuery() {
