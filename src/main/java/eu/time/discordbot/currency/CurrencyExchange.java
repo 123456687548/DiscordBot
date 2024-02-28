@@ -15,7 +15,7 @@ public class CurrencyExchange {
     private static CurrencyExchange INSTANCE = null;
     private static final String CURRENCY_EXCHANGE_RATE_URI = String.format("https://v6.exchangerate-api.com/v6/%s/latest/", getProperty("exchangerateKey"));
     private final Gson gson = new Gson();
-    private Requester requester = new Requester();
+    private final Requester requester = new Requester();
 
     private Map<String, Double> currentUSDExchangeRateMap = getCurrentExchangeRate("USD").getConversion_rates();
 

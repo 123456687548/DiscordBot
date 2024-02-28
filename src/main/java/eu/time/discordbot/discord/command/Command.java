@@ -13,7 +13,7 @@ import java.util.Map;
 public abstract class Command<T> {
     protected final MessageHandler messageHandler = MessageHandler.getInstance();
     private final String name;
-    private String description;
+    private final String description;
 
     protected final List<OptionData> options = new ArrayList<>();
 
