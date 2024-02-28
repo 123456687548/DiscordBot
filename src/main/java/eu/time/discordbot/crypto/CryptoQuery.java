@@ -34,6 +34,7 @@ public class CryptoQuery {
     }
 
     public void startNewDay() {
+        getCurrentADA_EUR();
         if (startADA_EUR != null) {
             MessageEmbed messageEmbed = createDiscordMessage();
             channel.sendMessageEmbeds(messageEmbed).queue();
