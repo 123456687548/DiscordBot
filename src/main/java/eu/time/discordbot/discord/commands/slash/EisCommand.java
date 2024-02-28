@@ -1,11 +1,8 @@
 package eu.time.discordbot.discord.commands.slash;
 
-import data.Product;
-import eis.EisQuery;
 import eu.time.discordbot.discord.command.SlashCommand;
 import eu.time.discordbot.eis.EisHandler;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
