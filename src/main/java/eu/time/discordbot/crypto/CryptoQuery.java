@@ -15,6 +15,8 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static eu.time.discordbot.discord.DiscordBot.EINGANGSHALLEN_CHANNEL_ID;
+
 public class CryptoQuery {
     public static final String NAN = "NaN";
     private static final String GET_TICKERS_URL = "https://api.crypto.com/exchange/v1/public/get-tickers?instrument_name=";
@@ -27,7 +29,7 @@ public class CryptoQuery {
     private Ticker startADA_EUR;
 
     public CryptoQuery(DiscordBot discordBot) {
-        channel = discordBot.getJda().getTextChannelById(362947456490668033L);
+        channel = discordBot.getJda().getTextChannelById(EINGANGSHALLEN_CHANNEL_ID);
         getCurrentADA_EUR();
 
         startADA_EUR = currentADA_EUR;
