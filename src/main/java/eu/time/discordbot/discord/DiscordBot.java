@@ -45,14 +45,14 @@ public enum DiscordBot {
                     .addEventListeners(new UserListener())
                     .addEventListeners(new ChatListener())
                     .setEnabledIntents(EnumSet.allOf(GatewayIntent.class))
-                    .setActivity(Activity.playing("V. 1.2"))
+                    .setActivity(Activity.playing("V. 1.3"))
                     .build();
 
             Collection<Command<SlashCommandInteractionEvent>> slashCommands = slashCommandListener.getCommands();
             slashCommands.forEach(slashCommand -> jda.upsertCommand(slashCommand.getName(), slashCommand.getDescription()).addOptions(slashCommand.getOptions()).queue());
             jda.awaitReady();
 
-            new BitcointHalvin(this).startTimer();
+            new BitcointHalvin().startTimer(this);
 
             launchCryptoQuery();
             //            launchEisQuery();

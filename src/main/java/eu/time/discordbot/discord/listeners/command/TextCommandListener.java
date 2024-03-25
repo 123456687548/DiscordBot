@@ -1,6 +1,7 @@
 package eu.time.discordbot.discord.listeners.command;
 
 import eu.time.discordbot.discord.command.Command;
+import eu.time.discordbot.discord.commands.text.BitcoinHalvingCommand;
 import eu.time.discordbot.discord.commands.text.ClearCommand;
 import eu.time.discordbot.discord.commands.text.PingCommand;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -16,7 +17,8 @@ public class TextCommandListener extends CommandListener<MessageReceivedEvent> {
     public TextCommandListener() {
         super(Map.ofEntries(
                 new PingCommand().getAsPair(),
-                new ClearCommand().getAsPair()
+                new ClearCommand().getAsPair(),
+                new BitcoinHalvingCommand().getAsPair()
         ));
     }
 

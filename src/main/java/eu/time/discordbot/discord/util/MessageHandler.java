@@ -2,6 +2,7 @@ package eu.time.discordbot.discord.util;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -35,6 +36,15 @@ public class MessageHandler {
     public void sendMessage(TextChannel channel, CharSequence msg) {
         if(channel == null) return;
         channel.sendMessage(msg).queue();
+    }
+
+    public void sendEmbed(MessageReceivedEvent event, MessageEmbed embed) {
+        sendEmbed(event.getChannel().asTextChannel(), embed);
+    }
+
+    public void sendEmbed(TextChannel channel, MessageEmbed embed){
+        if(channel == null) return;
+        channel.sendMessageEmbeds(embed).queue();
     }
 
     public static MessageHandler create(JDA jda) {
