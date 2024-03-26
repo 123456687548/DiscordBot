@@ -5,6 +5,7 @@ import eu.time.discordbot.http.Requester;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,7 +15,7 @@ import java.util.TimerTask;
 
 import static eu.time.discordbot.discord.DiscordBot.EINGANGSHALLEN_CHANNEL_ID;
 
-public class BitcointHalvin {
+public class BitcointHalving {
     private static final String LAST_BLOCK_URL = "https://www.satochi.co//latest-block";
     private final Requester requester = new Requester();
     private TextChannel channel;
@@ -22,22 +23,31 @@ public class BitcointHalvin {
     private final double BLOCK_TIME = 9.4;
     private long lastReportedBlock = Long.MAX_VALUE;
 
-    private long getTilHalving() {
-        long lastBlock = getLastBlock();
+    @Nullable
+    private Long getTilHalving() {
+        Long lastBlock = getLastBlock();
+        if (lastBlock == null) {
+            return null;
+        }
 
         return 840000 - lastBlock;
     }
 
+    @Nullable
     public MessageEmbed getUntilHalvingMessage() {
-        long tilHalving = getTilHalving();
+        Long tilHalving = getTilHalving();
+        if (tilHalving == null) {
+            return null;
+        }
 
         UntilHalving untilHalving = calcUntilHalving(tilHalving);
         return createEmbedMsg(untilHalving);
     }
 
     private void doTimer() {
-        long tilHalving = getTilHalving();
-        if (tilHalving == lastReportedBlock) {
+        Long tilHalving = getTilHalving();
+
+        if (tilHalving == null || tilHalving == lastReportedBlock) {
             return;
         }
 
@@ -72,7 +82,12 @@ public class BitcointHalvin {
 
     private MessageEmbed createEmbedMsg(UntilHalving untilHalving) {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Bitcoin Halving Timer");
+        String bitcoinHalvingTimerTitle = "Bitcoin Halving Timer";
+        if (DiscordBot.IS_DEBUG) {
+            embed.setTitle(bitcoinHalvingTimerTitle + " DEBUG");
+        } else {
+            embed.setTitle(bitcoinHalvingTimerTitle);
+        }
         embed.setUrl("https://bitbo.io/de/halving/");
         embed.addField("Halving in:", String.format("%d Days %d Hours %d Minutes %d Seconds", untilHalving.getDaysCalc(), untilHalving.getHoursCalc(), untilHalving.getMinutesCalc(), untilHalving.getSecondsCalc()), false);
         embed.addField("Halving date:", DateTimeFormatter.ISO_LOCAL_DATE.format(untilHalving.getHalvingDate()), false);
@@ -80,14 +95,20 @@ public class BitcointHalvin {
         return embed.build();
     }
 
-    private long getLastBlock() {
+    @Nullable
+    private Long getLastBlock() {
         String szlastBlock = requester.get(LAST_BLOCK_URL);
+
+        if (szlastBlock == null) {
+            return null;
+        }
+
         return Long.parseLong(szlastBlock);
     }
 
     public void startTimer(DiscordBot discordBot) {
         this.channel = discordBot.getJda().getTextChannelById(EINGANGSHALLEN_CHANNEL_ID);
-        Timer timer = new Timer();
+        Timer timer = new Timer("BitcoinHalvingTimer");
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {

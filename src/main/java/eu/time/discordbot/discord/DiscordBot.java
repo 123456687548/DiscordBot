@@ -1,6 +1,6 @@
 package eu.time.discordbot.discord;
 
-import eu.time.discordbot.crypto.BitcointHalvin;
+import eu.time.discordbot.crypto.BitcointHalving;
 import eu.time.discordbot.crypto.CryptoExecutor;
 import eu.time.discordbot.discord.command.Command;
 import eu.time.discordbot.discord.listeners.command.SlashCommandListener;
@@ -19,17 +19,25 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.EnumSet;
 
 public enum DiscordBot {
     INSTANCE;
     public static final Logger LOG = LoggerFactory.getLogger(DiscordBot.class);
+    public static final boolean IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().contains("-agentlib:jdwp");
 
     public static final long EINGANGSHALLEN_CHANNEL_ID = 362947456490668033L;
-
-    private boolean initalized = false;
+    public static final long ADMIN_CHANNEL_ID = 362948120658575360L;
     private JDA jda;
+    private static String version = "V. 1.3.1";
+
+    static {
+        if (IS_DEBUG) {
+            version = version + " - DEBUG";
+        }
+    }
 
     DiscordBot() {
     }
@@ -45,14 +53,14 @@ public enum DiscordBot {
                     .addEventListeners(new UserListener())
                     .addEventListeners(new ChatListener())
                     .setEnabledIntents(EnumSet.allOf(GatewayIntent.class))
-                    .setActivity(Activity.playing("V. 1.3"))
+                    .setActivity(Activity.playing(version))
                     .build();
 
             Collection<Command<SlashCommandInteractionEvent>> slashCommands = slashCommandListener.getCommands();
             slashCommands.forEach(slashCommand -> jda.upsertCommand(slashCommand.getName(), slashCommand.getDescription()).addOptions(slashCommand.getOptions()).queue());
             jda.awaitReady();
 
-            new BitcointHalvin().startTimer(this);
+            new BitcointHalving().startTimer(this);
 
             launchCryptoQuery();
             //            launchEisQuery();
@@ -63,7 +71,7 @@ public enum DiscordBot {
         }
     }
 
-     private void launchCryptoQuery() {
+    private void launchCryptoQuery() {
         CryptoExecutor cryptoExecutor = new CryptoExecutor(this);
         cryptoExecutor.startExecutionAt(23, 59, 59);
     }
@@ -75,14 +83,5 @@ public enum DiscordBot {
 
     public JDA getJda() {
         return jda;
-    }
-
-    public static DiscordBot getInstance() {
-        if (!INSTANCE.initalized) {
-            INSTANCE.launch();
-            INSTANCE.initalized = true;
-        }
-
-        return INSTANCE;
     }
 }
