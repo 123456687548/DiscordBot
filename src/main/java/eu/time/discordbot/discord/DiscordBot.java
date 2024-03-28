@@ -29,6 +29,7 @@ public enum DiscordBot {
     public static final boolean IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().contains("-agentlib:jdwp");
 
     public static final long EINGANGSHALLEN_CHANNEL_ID = 362947456490668033L;
+    public static final long CRYPTO_CHANNEL_ID = 914822335146651660L;
     public static final long ADMIN_CHANNEL_ID = 362948120658575360L;
     private JDA jda;
     private static String version = "V. 1.3.1";

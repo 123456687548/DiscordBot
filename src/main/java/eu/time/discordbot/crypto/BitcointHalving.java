@@ -13,7 +13,7 @@ import java.time.format.FormatStyle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static eu.time.discordbot.discord.DiscordBot.EINGANGSHALLEN_CHANNEL_ID;
+import static eu.time.discordbot.discord.DiscordBot.CRYPTO_CHANNEL_ID;
 
 public class BitcointHalving {
     private static final String LAST_BLOCK_URL = "https://www.satochi.co//latest-block";
@@ -51,7 +51,7 @@ public class BitcointHalving {
             return;
         }
 
-        if (tilHalving > 100 && tilHalving % 100 != 0) {
+        if (tilHalving > 20 && tilHalving % 100 != 0) {
             return;
         }
 
@@ -107,7 +107,7 @@ public class BitcointHalving {
     }
 
     public void startTimer(DiscordBot discordBot) {
-        this.channel = discordBot.getJda().getTextChannelById(EINGANGSHALLEN_CHANNEL_ID);
+        this.channel = discordBot.getJda().getTextChannelById(CRYPTO_CHANNEL_ID);
         Timer timer = new Timer("BitcoinHalvingTimer");
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
